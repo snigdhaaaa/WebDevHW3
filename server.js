@@ -51,9 +51,9 @@ app.delete('/movies/:id', async (req, res) => {
 });
 
 // Load assets
-app.use('/assets/css', express.static(path.resolve(__dirname, 'assets/css')));
-app.use('/assets/img', express.static(path.resolve(__dirname, 'assets/img')));
-app.use('/assets/js', express.static(path.resolve(__dirname, 'assets/js')));
+//app.use('/assets/css', express.static(path.resolve(__dirname, 'assets/css')));
+//app.use('/assets/img', express.static(path.resolve(__dirname, 'assets/img')));
+app.use('/script.js', express.static(path.resolve(__dirname, 'script.js')));
 
 // Route to serve index.html
 app.get('/', (req, res) => {
