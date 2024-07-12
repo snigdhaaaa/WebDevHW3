@@ -4,7 +4,81 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Movie Manager</title>
-  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    body {
+    font-family: Arial, sans-serif;
+    background-color: #D0E7D2;
+    color: #618264;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  
+  .container {
+    text-align: center;
+    background-color: #B0D9B1;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  h1, h2 {
+    color: #79AC78;
+  }
+  
+  input {
+    padding: 10px;
+    margin: 5px;
+    border: 1px solid #79AC78;
+    border-radius: 5px;
+  }
+  
+  button {
+    padding: 10px 20px;
+    margin: 5px;
+    background-color: #79AC78;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #618264;
+  }
+  
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  li {
+    padding: 10px;
+    margin: 5px;
+    background-color: #D0E7D2;
+    border: 1px solid #79AC78;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  li button {
+    padding: 5px 10px;
+    margin: 0;
+    background-color: #B0D9B1;
+    color: #618264;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  li button:hover {
+    background-color: #79AC78;
+  }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -19,6 +93,79 @@
       <ul id="movies"></ul>
     </div>
   </div>
-  <script src="/assets/js/script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const moviesList = document.getElementById('movies');
+    const titleInput = document.getElementById('title');
+    const genreInput = document.getElementById('genre');
+    const addMovieButton = document.getElementById('add-movie');
+  
+    let editMode = false;
+    let editMovieId = null;
+  
+    // Fetch and display movies
+    const fetchMovies = async () => {
+      const response = await fetch('/movies');
+      const movies = await response.json();
+      moviesList.innerHTML = '';
+      movies.forEach(movie => {
+        const li = document.createElement('li');
+        li.textContent = `${movie.title} - ${movie.genre}`;
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.onclick = async () => {
+          await fetch(`/movies/${movie._id}`, { method: 'DELETE' });
+          fetchMovies();
+        };
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.onclick = () => {
+          editMode = true;
+          editMovieId = movie._id;
+          titleInput.value = movie.title;
+          genreInput.value = movie.genre;
+          addMovieButton.textContent = 'Update Movie';
+        };
+        li.appendChild(editButton);
+        li.appendChild(deleteButton);
+        moviesList.appendChild(li);
+      });
+    };
+  
+    // Add or update a Movie
+    addMovieButton.addEventListener('click', async () => {
+      const title = titleInput.value;
+      const genre = genreInput.value;
+      if (title && genre) {
+        if (editMode) {
+          await fetch(`/movies/${editMovieId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ title, genre }),
+          });
+          editMode = false;
+          editMovieId = null;
+          addMovieButton.textContent = 'Add Movie';
+        } else {
+          await fetch('/movies', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ title, genre }),
+          });
+        }
+        titleInput.value = '';
+        genreInput.value = '';
+        fetchMovies();
+      }
+    });
+  
+    fetchMovies();
+  });
+  
+  </script></script>
 </body>
 </html>
